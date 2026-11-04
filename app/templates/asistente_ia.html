@@ -1,0 +1,27 @@
+{% extends "appbuilder/base.html" %}
+{% block content %}
+<div class="container my-4">
+    <div class="panel panel-info">
+        <div class="panel-heading">
+            <h3 class="panel-title">🤖 Asistente de Diagnóstico Veterinario con IA</h3>
+        </div>
+        <div class="panel-body">
+            <form method="post" action="">
+                <div class="form-group">
+                    <label for="consulta">Síntomas o Consulta Clínica:</label>
+                    <textarea class="form-control" id="consulta" name="consulta" rows="4" placeholder="Ej. Perro Labrador de 5 años con pérdida de apetito y letargo..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Generar Recomendación IA</button>
+            </form>
+
+            {% if respuesta %}
+            <hr>
+            <div class="alert alert-success">
+                <h4><strong>Análisis Generado:</strong></h4>
+                <p>{{ respuesta }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

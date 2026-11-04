@@ -11,7 +11,7 @@ def create_app() -> Flask:
         # db.create_all()
         appbuilder.init_app(app, db.session)
         from . import models
-        from .models import Categoria, Ingrediente
+        from .models import Especie, Dueno, Mascota, Veterinario, CitaMedica, HistorialClinico
         from . import views
     return app
 
