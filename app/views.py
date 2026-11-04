@@ -1,85 +1,100 @@
-from flask_appbuilder  import ModelView
+from flask import render_template, request
+from flask_appbuilder import ModelView, BaseView, expose, has_access
 from flask_appbuilder.models.sqla.interface import SQLAInterface
-from . import appbuilder
-from .models import Categoria, Ingrediente
+from sqlalchemy import func
+from . import appbuilder, db
+from .models import Especie, Dueno, Mascota, Veterinario, CitaMedica, HistorialClinico
 
-class CategoriaView(ModelView):
-    datamodel = SQLAInterface(Categoria)
+# --- VISTAS CRUD DE TABLAS ---
+class EspecieView(ModelView):
+    datamodel = SQLAInterface(Especie)
 
-    label_columns = {"nombre": "Nombre",
-                     "descripcion": "Descripcion",
-                     "activo": "Activo",
-                     "ingredientes": "Ingredientes"
-                    }
-    
-    list_columns = ["nombre", "descripcion", "activo"]
+class DuenoView(ModelView):
+    datamodel = SQLAInterface(Dueno)
 
-    show_columns = [ "id", "nombre", "descripcion", "activo", "ingredientes"]
-    
-    add_columns = ["nombre", "descripcion", "activo"]
-    
-    edit_columns = ["nombre", "descripcion", "activo"]
-    
-    order_columns = ["nombre"]
-    
-    
-    
-    
-class IngredienteView(ModelView):
-    datamodel = SQLAInterface(Ingrediente)
+class MascotaView(ModelView):
+    datamodel = SQLAInterface(Mascota)
 
-    label_columns = {"nombre": "Nombre",
-                     "categoria": "Categoria",
-                     "cantidad": "Cantidad",
-                     "unidad_medida": "Unidad de Medida",
-                     "costo_unitario": "Costo Unitario",
-                     "stock_minimo" : "Stock Minimo",
-                     "fecha_vencimiento" : "Fecha de Vencimiento",
-                     "activo" : "Activo"
-                    }
-    
-    list_columns = ["nombre",
-                     "categoria",
-                     "cantidad",
-                     "unidad_medida",
-                     "costo_unitario",
-                     "stock_minimo",
-                     "fecha_vencimiento",
-                     "activo"]
+class VeterinarioView(ModelView):
+    datamodel = SQLAInterface(Veterinario)
 
-    show_columns = [ "id", "nombre",
-                     "categoria",
-                     "cantidad",
-                     "unidad_medida",
-                     "costo_unitario",
-                     "stock_minimo",
-                     "fecha_vencimiento",
-                     "activo"]
-    
-    add_columns = ["nombre",
-                     "categoria",
-                     "cantidad",
-                     "unidad_medida",
-                     "costo_unitario",
-                     "stock_minimo",
-                     "fecha_vencimiento",
-                     "activo"]
-    
-    edit_columns = add_columns
-    search_columns = ["nombre"]
-    order_columns = ["nombre"]
-    
-# Registro
-appbuilder.add_view(
-        CategoriaView,
-        "Modulo categorias",
-        icon = "fa-tags",
-        category = "Inventario"
-)
-    
-appbuilder.add_view(
-        IngredienteView,
-        "Modulo Ingredientes",
-        icon = "fa-cubes",
-        category = "Inventario"
-)
+class CitaMedicaView(ModelView):
+    datamodel = SQLAInterface(CitaMedica)
+
+class HistorialClinicoView(ModelView):
+    datamodel = SQLAInterface(HistorialClinico)
+
+# --- VISTA DE REPORTES ANALÍTICOS ---
+class ReportesView(BaseView):
+    default_view = 'citas_por_veterinario'
+
+    @expose('/citas-veterinario/')
+    @has_access
+    def citas_por_veterinario(self):
+        datos = db.session.query(
+            Veterinario.nombre, 
+            func.count(CitaMedica.id)
+        ).join(CitaMedica).group_by(Veterinario.id).all()
+        
+        return self.render_template('reporte.html', 
+                                   titulo="Reporte 1: Citas por Veterinario", 
+                                   headers=["Veterinario", "Total Citas"], 
+                                   filas=datos)
+
+    @expose('/mascotas-especie/')
+    @has_access
+    def mascotas_por_especie(self):
+        datos = db.session.query(
+            Especie.nombre, 
+            func.count(Mascota.id)
+        ).join(Mascota).group_by(Especie.id).all()
+        
+        return self.render_template('reporte.html', 
+                                   titulo="Reporte 2: Mascotas por Especie", 
+                                   headers=["Especie", "Total Mascotas"], 
+                                   filas=datos)
+
+    @expose('/citas-estado/')
+    @has_access
+    def citas_por_estado(self):
+        datos = db.session.query(
+            CitaMedica.estado, 
+            func.count(CitaMedica.id)
+        ).group_by(CitaMedica.estado).all()
+        
+        return self.render_template('reporte.html', 
+                                   titulo="Reporte 3: Citas por Estado", 
+                                   headers=["Estado", "Total"], 
+                                   filas=datos)
+
+# --- VISTA DEL ASISTENTE IA ---
+class AsistenteIAView(BaseView):
+    default_view = 'asistente'
+
+    @expose('/asistente/', methods=['GET', 'POST'])
+    @has_access
+    def asistente(self):
+        respuesta = None
+        if request.method == 'POST':
+            consulta = request.form.get('consulta')
+            respuesta = f"Recomendación Clínica IA para '{consulta}': Se sugiere evaluar signos vitales, mantener hidratación constante y realizar exámen de sangre preventivo."
+        
+        return self.render_template('asistente_ia.html', respuesta=respuesta)
+
+# --- REGISTROS EN EL MENÚ ---
+appbuilder.add_view(EspecieView, "Especies", category="Gestión Veterinaria")
+appbuilder.add_view(DuenoView, "Dueños", category="Gestión Veterinaria")
+appbuilder.add_view(MascotaView, "Mascotas", category="Gestión Veterinaria")
+appbuilder.add_view(VeterinarioView, "Veterinarios", category="Gestión Veterinaria")
+appbuilder.add_view(CitaMedicaView, "Citas Médicas", category="Gestión Veterinaria")
+appbuilder.add_view(HistorialClinicoView, "Historiales Clínicos", category="Gestión Veterinaria")
+
+# Menú de Reportes Analíticos
+appbuilder.add_view_no_menu(ReportesView)
+appbuilder.add_link("Citas por Veterinario", href="/reportesview/citas-veterinario/", category="Reportes Analíticos")
+appbuilder.add_link("Mascotas por Especie", href="/reportesview/mascotas-especie/", category="Reportes Analíticos")
+appbuilder.add_link("Citas por Estado", href="/reportesview/citas-estado/", category="Reportes Analíticos")
+
+# Menú del Asistente IA
+appbuilder.add_view_no_menu(AsistenteIAView)
+appbuilder.add_link("Asistente IA", href="/asistenteiaview/asistente/", category="Asistente IA")
