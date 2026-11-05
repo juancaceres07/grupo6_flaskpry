@@ -6,23 +6,141 @@ from . import appbuilder, db
 from .models import Especie, Dueno, Mascota, Veterinario, CitaMedica, HistorialClinico
 
 # --- VISTAS CRUD DE TABLAS ---
+# En cada vista se define:
+#   - list_columns:   columnas que se ven en el listado
+#   - show_columns:   campos del detalle de un registro
+#   - add/edit_columns: campos (y su orden) en los formularios
+#   - search_columns: campos disponibles en el buscador
+#   - label_columns:  nombres en español que ve el usuario
+#   - base_order:     orden por defecto del listado
+
 class EspecieView(ModelView):
     datamodel = SQLAInterface(Especie)
+
+    list_title = "Especies"
+    show_title = "Detalle de la especie"
+    add_title = "Nueva especie"
+    edit_title = "Editar especie"
+
+    list_columns = ["nombre"]
+    show_columns = ["nombre"]
+    add_columns = ["nombre"]
+    edit_columns = ["nombre"]
+    search_columns = ["nombre"]
+    label_columns = {"nombre": "Nombre"}
+    base_order = ("nombre", "asc")
+
 
 class DuenoView(ModelView):
     datamodel = SQLAInterface(Dueno)
 
+    list_title = "Dueños"
+    show_title = "Detalle del dueño"
+    add_title = "Nuevo dueño"
+    edit_title = "Editar dueño"
+
+    list_columns = ["nombre", "telefono", "email", "direccion"]
+    show_columns = ["nombre", "telefono", "email", "direccion"]
+    add_columns = ["nombre", "telefono", "email", "direccion"]
+    edit_columns = ["nombre", "telefono", "email", "direccion"]
+    search_columns = ["nombre", "telefono", "email"]
+    label_columns = {
+        "nombre": "Nombre completo",
+        "telefono": "Teléfono",
+        "email": "Correo electrónico",
+        "direccion": "Dirección",
+    }
+    base_order = ("nombre", "asc")
+
+
 class MascotaView(ModelView):
     datamodel = SQLAInterface(Mascota)
+
+    list_title = "Mascotas"
+    show_title = "Detalle de la mascota"
+    add_title = "Nueva mascota"
+    edit_title = "Editar mascota"
+
+    list_columns = ["nombre", "especie", "dueno", "edad", "peso"]
+    show_columns = ["nombre", "especie", "dueno", "edad", "peso"]
+    add_columns = ["nombre", "especie", "dueno", "edad", "peso"]
+    edit_columns = ["nombre", "especie", "dueno", "edad", "peso"]
+    search_columns = ["nombre", "especie", "dueno"]
+    label_columns = {
+        "nombre": "Nombre",
+        "especie": "Especie",
+        "dueno": "Dueño",
+        "edad": "Edad (años)",
+        "peso": "Peso (kg)",
+    }
+    base_order = ("nombre", "asc")
+
 
 class VeterinarioView(ModelView):
     datamodel = SQLAInterface(Veterinario)
 
+    list_title = "Veterinarios"
+    show_title = "Detalle del veterinario"
+    add_title = "Nuevo veterinario"
+    edit_title = "Editar veterinario"
+
+    list_columns = ["nombre", "especialidad", "telefono"]
+    show_columns = ["nombre", "especialidad", "telefono"]
+    add_columns = ["nombre", "especialidad", "telefono"]
+    edit_columns = ["nombre", "especialidad", "telefono"]
+    search_columns = ["nombre", "especialidad"]
+    label_columns = {
+        "nombre": "Nombre",
+        "especialidad": "Especialidad",
+        "telefono": "Teléfono",
+    }
+    base_order = ("nombre", "asc")
+
+
 class CitaMedicaView(ModelView):
     datamodel = SQLAInterface(CitaMedica)
 
+    list_title = "Citas médicas"
+    show_title = "Detalle de la cita"
+    add_title = "Nueva cita"
+    edit_title = "Editar cita"
+
+    list_columns = ["fecha", "mascota", "veterinario", "motivo", "estado"]
+    show_columns = ["fecha", "mascota", "veterinario", "motivo", "estado"]
+    add_columns = ["fecha", "mascota", "veterinario", "motivo", "estado"]
+    edit_columns = ["fecha", "mascota", "veterinario", "motivo", "estado"]
+    search_columns = ["fecha", "mascota", "veterinario", "estado", "motivo"]
+    label_columns = {
+        "fecha": "Fecha",
+        "mascota": "Mascota",
+        "veterinario": "Veterinario",
+        "motivo": "Motivo",
+        "estado": "Estado",
+    }
+    # Las citas más recientes primero
+    base_order = ("fecha", "desc")
+
+
 class HistorialClinicoView(ModelView):
     datamodel = SQLAInterface(HistorialClinico)
+
+    list_title = "Historiales clínicos"
+    show_title = "Detalle del historial clínico"
+    add_title = "Nuevo historial clínico"
+    edit_title = "Editar historial clínico"
+
+    list_columns = ["cita", "cita.mascota", "diagnostico", "tratamiento"]
+    show_columns = ["cita", "cita.mascota", "cita.veterinario", "diagnostico", "tratamiento"]
+    add_columns = ["cita", "diagnostico", "tratamiento"]
+    edit_columns = ["cita", "diagnostico", "tratamiento"]
+    search_columns = ["cita", "diagnostico", "tratamiento"]
+    label_columns = {
+        "cita": "Cita",
+        "cita.mascota": "Mascota",
+        "cita.veterinario": "Veterinario",
+        "diagnostico": "Diagnóstico",
+        "tratamiento": "Tratamiento",
+    }
 
 # --- VISTA DE REPORTES ANALÍTICOS ---
 class ReportesView(BaseView):

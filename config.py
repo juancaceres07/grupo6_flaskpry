@@ -23,8 +23,8 @@ CSRF_ENABLED = True
 # ------------------------------
 # GLOBALS FOR APP Builder
 # ------------------------------
-# Uncomment to setup Your App name
-# APP_NAME = "My App Name"
+# Nombre de la aplicación (se muestra en la barra superior y en la pestaña del navegador)
+APP_NAME = "Clínica Veterinaria"
 
 # Uncomment to setup Setup an App icon
 # APP_ICON = "static/img/logo.jpg"
@@ -63,20 +63,14 @@ AUTH_TYPE = AUTH_DB
 # ---------------------------------------------------
 # Babel config for translations
 # ---------------------------------------------------
-# Setup default language
-BABEL_DEFAULT_LOCALE = "en"
+# Idioma por defecto: español
+BABEL_DEFAULT_LOCALE = "es"
 # Your application default translation path
 BABEL_DEFAULT_FOLDER = "translations"
-# The allowed translation for you app
+# Idiomas disponibles en el selector de la barra superior
 LANGUAGES = {
+    "es": {"flag": "bo", "name": "Español"},
     "en": {"flag": "gb", "name": "English"},
-    "pt": {"flag": "pt", "name": "Portuguese"},
-    "pt_BR": {"flag": "br", "name": "Pt Brazil"},
-    "es": {"flag": "es", "name": "Spanish"},
-    "de": {"flag": "de", "name": "German"},
-    "zh": {"flag": "cn", "name": "Chinese"},
-    "ru": {"flag": "ru", "name": "Russian"},
-    "pl": {"flag": "pl", "name": "Polish"},
 }
 # ---------------------------------------------------
 # Image and file configuration
