@@ -3,22 +3,30 @@
 <div class="container my-4">
     <div class="panel panel-info">
         <div class="panel-heading">
-            <h3 class="panel-title">🤖 Asistente de Diagnóstico Veterinario con IA</h3>
+            <h3 class="panel-title">🤖 Asistente de Orientación Veterinaria con IA</h3>
         </div>
         <div class="panel-body">
             <form method="post" action="">
                 <div class="form-group">
-                    <label for="consulta">Síntomas o Consulta Clínica:</label>
-                    <textarea class="form-control" id="consulta" name="consulta" rows="4" placeholder="Ej. Perro Labrador de 5 años con pérdida de apetito y letargo..." required></textarea>
+                    <label for="consulta">Consulta sobre el cuidado o bienestar de tu animal:</label>
+                    <textarea class="form-control" id="consulta" name="consulta" rows="4" placeholder="Ej. Mi perro lleva un día con poco apetito, ¿qué señales debería observar?" required>{{ consulta or '' }}</textarea>
                 </div>
-                <button type="submit" class="btn btn-primary">Generar Recomendación IA</button>
+                <button type="submit" class="btn btn-primary">Consultar al asistente</button>
             </form>
+
+            {% if error %}
+            <hr>
+            <div class="alert alert-warning" role="alert">
+                <p>{{ error }}</p>
+            </div>
+            {% endif %}
 
             {% if respuesta %}
             <hr>
-            <div class="alert alert-success">
-                <h4><strong>Análisis Generado:</strong></h4>
-                <p>{{ respuesta }}</p>
+            <div class="alert alert-info" role="status">
+                <h4><strong>Orientación general:</strong></h4>
+                <p style="white-space: pre-line;">{{ respuesta }}</p>
+                <small>Esta información no confirma un diagnóstico ni sustituye la evaluación de un profesional veterinario.</small>
             </div>
             {% endif %}
         </div>
