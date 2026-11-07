@@ -1,6 +1,7 @@
-from flask import render_template, request
+from flask import current_app, render_template, request
 from flask_appbuilder import ModelView, BaseView, expose, has_access
 from flask_appbuilder.models.sqla.interface import SQLAInterface
+from app.ai.asistente_ai import AsistenteAIError, obtener_respuesta
 from sqlalchemy import func
 from . import appbuilder, db
 from .models import Especie, Dueno, Mascota, Veterinario, CitaMedica, HistorialClinico
@@ -75,11 +76,37 @@ class AsistenteIAView(BaseView):
     @has_access
     def asistente(self):
         respuesta = None
+        error = None
+        consulta = ""
+
         if request.method == 'POST':
-            consulta = request.form.get('consulta')
-            respuesta = f"Recomendación Clínica IA para '{consulta}': Se sugiere evaluar signos vitales, mantener hidratación constante y realizar exámen de sangre preventivo."
-        
-        return self.render_template('asistente_ia.html', respuesta=respuesta)
+            consulta = request.form.get('consulta', '').strip()
+
+            if not consulta:
+                error = "Por favor, escribe una consulta."
+            else:
+                try:
+                    respuesta = obtener_respuesta(consulta)
+                except AsistenteAIError as exc:
+                    error = exc.mensaje_usuario
+                except Exception as exc:
+                    # No registrar el texto de la excepción: el SDK puede incluir
+                    # datos de la petición en sus detalles internos.
+                    current_app.logger.error(
+                        "Fallo interno en el asistente IA (%s)",
+                        type(exc).__name__,
+                    )
+                    error = (
+                        "No se pudo obtener una respuesta en este momento. "
+                        "Intenta nuevamente."
+                    )
+
+        return self.render_template(
+            'asistente_ia.html',
+            consulta=consulta,
+            respuesta=respuesta,
+            error=error,
+        )
 
 # --- REGISTROS EN EL MENÚ ---
 appbuilder.add_view(EspecieView, "Especies", category="Gestión Veterinaria")
